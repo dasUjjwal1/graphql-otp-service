@@ -16,8 +16,7 @@ public class OtpServiceApplication {
                         .socketTimeoutMillis(5000)  // set timeout to 5 seconds
                         .connectionTimeoutMillis(5000) // set connection timeout to 5 seconds
                         .build());
-        jedis.set("foo", "bar");
-        System.out.println(jedis.get("foo"));
+        
     }
 
 }
