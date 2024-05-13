@@ -1,4 +1,4 @@
-package com.surely.otpservice;
+package com.surelygql.otpservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

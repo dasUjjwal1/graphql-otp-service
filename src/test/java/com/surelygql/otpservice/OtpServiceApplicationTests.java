@@ -1,4 +1,4 @@
-package com.surely.otpservice;
+package com.surelygql.otpservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
