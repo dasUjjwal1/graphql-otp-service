@@ -1,7 +1,6 @@
 package com.surelygql.otpservice.handler;
 
-import com.mailjet.client.errors.MailjetException;
-import com.mailjet.client.errors.MailjetSocketTimeoutException;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.surelygql.otpservice.OtpServiceApplication;
 import com.surelygql.otpservice.service.SendOtpService;
 import org.slf4j.Logger;
@@ -12,10 +11,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.XReadGroupParams;
 import redis.clients.jedis.resps.StreamEntry;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class OtpHandler {
     final String stream1 = "stream1";
@@ -29,6 +25,13 @@ public class OtpHandler {
             .build());
     @Autowired
     private SendOtpService sendOtpService = new SendOtpService();
+
+    public String getRandomNumberString() {
+        Random rnd = new Random();
+        int number = rnd.nextInt(999999);
+        return String.format("%06d", number);
+    }
+
     public void init() {
         while (maxAttempt > 0) {
             try (Jedis jedis = pool.getResource()) {
@@ -40,16 +43,19 @@ public class OtpHandler {
                     for (Map.Entry<String, List<StreamEntry>> stringListEntry : response) {
                         List<StreamEntry> streamEntries = stringListEntry.getValue();
                         for (StreamEntry key : streamEntries) {
-                            sendOtpService.sendOtp(key.getFields().get("email"));
+                            String email = key.getFields().get("email");
+                            String type = key.getFields().get("type");
+                            String otpNumber = getRandomNumberString();
+                            sendOtpService.sendOtp(email, otpNumber);
+                            jedis.set(type + "-" + email, otpNumber);
+                            jedis.expire(type + "-" + email, 300);
                             jedis.xack(stream1, group1, key.getID());
-                            jedis.xtrim(stream1, 100, true);
+                            jedis.xtrim(stream1, 10, true);
                         }
                     }
                 }
-            } catch (JedisConnectionException es) {
+            } catch (JedisConnectionException | UnirestException es) {
                 Log.warn((es.getLocalizedMessage()));
-            } catch (MailjetSocketTimeoutException | MailjetException e) {
-                throw new RuntimeException(e);
             }
         }
 

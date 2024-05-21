@@ -1,8 +1,8 @@
 package com.surelygql.otpservice.service;
 
-import com.mailjet.client.errors.MailjetException;
-import com.mailjet.client.errors.MailjetSocketTimeoutException;
+
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 public interface SendOtp {
-    public void sendOtp(String email) throws MailjetSocketTimeoutException, MailjetException;
+     void sendOtp(String email,String otp) throws UnirestException;
 }

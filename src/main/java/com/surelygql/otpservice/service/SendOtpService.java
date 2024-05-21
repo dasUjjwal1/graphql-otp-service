@@ -1,38 +1,32 @@
 package com.surelygql.otpservice.service;
 
-import com.mailjet.client.MailjetClient;
-import com.mailjet.client.MailjetRequest;
-import com.mailjet.client.MailjetResponse;
-import com.mailjet.client.errors.MailjetException;
-import com.mailjet.client.errors.MailjetSocketTimeoutException;
-import com.mailjet.client.resource.Emailv31;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import com.mailjet.client.ClientOptions;
 
-public class SendOtpService implements SendOtp{
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+public class SendOtpService implements SendOtp {
+ Logger LOG = LoggerFactory.getLogger(SendOtpService.class);
     @Override
-    public void sendOtp(String email) throws MailjetSocketTimeoutException, MailjetException {
-        MailjetClient client;
-        MailjetRequest request;
-        MailjetResponse response;
-        client = new MailjetClient("7951d13d5c2b74a6ee571b481803f0f9", "136f1cf1cb6b5a92ef0ec0dfd2fe9fa3", new ClientOptions("v3.1"));
-        request = new MailjetRequest(Emailv31.resource)
-                .property(Emailv31.MESSAGES, new JSONArray()
-                        .put(new JSONObject()
-                                .put(Emailv31.Message.FROM, new JSONObject()
-                                        .put("Email", "das.ujjwal.1357@gmail.com")
-                                        .put("Name", "Ujjwal"))
-                                .put(Emailv31.Message.TO, new JSONArray()
-                                        .put(new JSONObject()
-                                                .put("Email", email)
-                                                .put("Name", "Ujjwal")))
-                                .put(Emailv31.Message.SUBJECT, "Greetings from Mailjet.")
-                                .put(Emailv31.Message.TEXTPART, "My first Mailjet email")
-                                .put(Emailv31.Message.HTMLPART, "<h3>Dear passenger 1, welcome to <a href='https://www.mailjet.com/'>Mailjet</a>!</h3><br />May the delivery force be with you!")
-                                .put(Emailv31.Message.CUSTOMID, "AppGettingStartedTest")));
-        response = client.post(request);
-        System.out.println(response.getStatus());
-        System.out.println(response.getData());
+    public void sendOtp(String email,String otp) throws UnirestException {
+        Map<String,String> requestHeader = new HashMap<>();
+        requestHeader.put("header",)
+       HttpResponse<JsonNode> response = Unirest.post("https://api.mailgun.net/v3/" + "sandbox920b7a1aa5244075b1bb8f9f97df8318.mailgun.org" + "/messages")
+                .basicAuth("api", "57cfbcdee75c5bb3761a74a2bc685389-a2dd40a3-53f7f2e6")
+                .headers()
+                .queryString("from", "Verification <hello@payrollbyte.com>")
+                .queryString("to", "sona95986@gmail.com")
+                .queryString("subject", "Verification")
+                .queryString("text",otp ).asJson();
+       LOG.info("response",response.getStatus());
+       LOG.info("body",response.getBody());
     }
 }
