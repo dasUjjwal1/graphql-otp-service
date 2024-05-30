@@ -2,10 +2,11 @@ package com.surelygql.otpservice.handler;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.surelygql.otpservice.OtpServiceApplication;
-import com.surelygql.otpservice.service.SendOtpService;
+import com.surelygql.otpservice.service.SendOtpServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.jedis.params.XReadGroupParams;
@@ -13,6 +14,7 @@ import redis.clients.jedis.resps.StreamEntry;
 
 import java.util.*;
 
+@Controller
 public class OtpHandler {
     final String stream1 = "stream1";
     final String group1 = "stream1";
@@ -24,13 +26,14 @@ public class OtpHandler {
             .connectionTimeoutMillis(5000) // set connection timeout to 5 seconds
             .build());
     @Autowired
-    private SendOtpService sendOtpService = new SendOtpService();
+    private SendOtpServiceImpl sendOtp = new SendOtpServiceImpl();
 
     public String getRandomNumberString() {
         Random rnd = new Random();
         int number = rnd.nextInt(999999);
         return String.format("%06d", number);
     }
+
 
     public void init() {
         while (maxAttempt > 0) {
@@ -46,11 +49,12 @@ public class OtpHandler {
                             String email = key.getFields().get("email");
                             String type = key.getFields().get("type");
                             String otpNumber = getRandomNumberString();
-                            sendOtpService.sendOtp(email, otpNumber);
+                            sendOtp.sendTextOtp(email, otpNumber);
                             jedis.set(type + "-" + email, otpNumber);
                             jedis.expire(type + "-" + email, 300);
                             jedis.xack(stream1, group1, key.getID());
                             jedis.xtrim(stream1, 10, true);
+
                         }
                     }
                 }
