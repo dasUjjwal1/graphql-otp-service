@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class OtpServiceApplication {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         SpringApplication.run(OtpServiceApplication.class, args);
         OtpHandler otpHandler = new OtpHandler();
         otpHandler.init();

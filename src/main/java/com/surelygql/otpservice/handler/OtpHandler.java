@@ -35,8 +35,9 @@ public class OtpHandler {
     }
 
 
-    public void init() {
-        while (maxAttempt > 0) {
+    public void init() throws InterruptedException {
+        var maxAttempt = 0;
+        while (maxAttempt < 10) {
             try (Jedis jedis = pool.getResource()) {
                 Map<String, StreamEntryID> stream = new HashMap<>();
                 stream.put(stream1, StreamEntryID.UNRECEIVED_ENTRY);
@@ -60,6 +61,9 @@ public class OtpHandler {
                 }
             } catch (JedisConnectionException | UnirestException es) {
                 Log.warn((es.getLocalizedMessage()));
+                maxAttempt += 1;
+                Thread.sleep(1000);
+
             }
         }
 
